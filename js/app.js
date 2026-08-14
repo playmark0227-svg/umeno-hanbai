@@ -88,7 +88,6 @@ async function boot() {
   $('#today').textContent = jDate(today());
   $('#conn').textContent = store.mode === 'cloud' ? 'クラウド保存' : 'このPC内';
   $('#conn').dataset.mode = store.mode;
-  if (store.company?.demo) document.body.classList.add('is-demo');
   $('#conn').title = store.mode === 'cloud'
     ? 'データはFirebaseに保存され、どのパソコンからでも同じものが見えます'
     : 'データはこのパソコンの中だけにあります。「バックアップ」で書き出してください';
@@ -308,23 +307,19 @@ async function userMenu() {
 /* ---------- はじめて起動したとき ---------- */
 async function firstRunHint() {
   const v = await modal({
-    title: 'ようこそ', width: 580,
+    title: 'はじめに', width: 580,
     body: el('div', {},
       el('p', {}, 'まだデータが入っていません。'),
-      el('p', {}, 'Access から書き出した「移行データ」フォルダの中身を読み込むと、得意先・商品・過去の売上がそのまま入ります。'),
+      el('p', {}, 'Access から書き出した ', el('b', {}, '「移行データ」フォルダ'),
+        ' の中身を読み込むと、得意先101社・商品・過去の売上 15,374件がそのまま入ります。'),
       el('p', { style: 'color:var(--sumi-2);font-size:.92rem' },
-        'とりあえず触ってみたいだけなら、架空のサンプルデータでも試せます。')),
+        'いつでも「バックアップ」の画面からやり直せます。')),
     buttons: [
       { label: 'あとで', value: null, class: 'btn--ghost' },
-      { label: 'サンプルで試す', value: 'demo', class: 'btn--ghost' },
       { label: 'Accessのデータを読み込む', value: 'go', class: 'btn--primary' },
     ],
   });
   if (v === 'go') go('ikou');
-  if (v === 'demo') {
-    const { loadDemo } = await import('./views/backup.js');
-    if (await loadDemo({ silent: true })) location.reload();
-  }
 }
 
 function showFatal(msg, e) {

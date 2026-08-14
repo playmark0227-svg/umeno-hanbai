@@ -4,7 +4,6 @@ import { store, COLLECTIONS } from '../store.js';
 import { el, yen, num, today, jDate, download, toCSV } from '../util.js';
 import { card, table, kpi, note, btn, field, input, toast, confirmBox, alertBox, busy, modal } from '../ui.js';
 import { setHint, go } from '../app.js';
-import { buildDemoData } from '../demo.js';
 
 const LAST_KEY = 'umeno.lastBackup';
 const META_FILES = { company: 'company', codeLists: 'codeLists' };
@@ -122,52 +121,7 @@ export async function render() {
 
     card('Accessからの引っ越し', el('div', {},
       el('p', {}, '「移行データ」フォルダの中の JSON ファイルを読み込みます。'),
-      el('div', { class: 'btnrow' }, btn('引っ越し画面をひらく', () => go('ikou'), 'btn--ghost')))),
-
-    card('お試し用のサンプル', el('div', {},
-      el('p', {}, '架空の得意先・商品・売上を入れて、操作を試せます。'
-        + '本番で使いはじめたあとは押さないでください。'),
-      el('div', { class: 'btnrow' },
-        btn('サンプルデータを入れる', async () => {
-          if (await loadDemo()) { toast('サンプルデータを入れました'); setTimeout(() => location.reload(), 700); }
-        }, 'btn--ghost')))));
-}
-
-/* ==================== サンプルデータ ==================== */
-/**
- * 架空のデータを入れて、操作を試せるようにする。
- * 中身は今あるものを全部消して入れ替えるので、必ず断りを入れる。
- */
-export async function loadDemo({ silent = false } = {}) {
-  if (!silent) {
-    const has = (await store.all('sales').catch(() => [])).length
-      + (await store.all('customers').catch(() => [])).length;
-    const warn = store.mode === 'cloud'
-      ? '⚠ いまクラウド保存につながっています。本番のデータが消えます。\n\n'
-      : '';
-    const now = has ? `いま ${has.toLocaleString()}件のデータが入っています。\n\n` : '';
-    if (!await confirmBox(
-      `${warn}${now}架空の得意先・商品・売上を入れて、操作を試せるようにします。\n`
-      + '（得意先名・住所・金額はすべて作り物です）\n\n'
-      + '今のデータはすべて置き換わります。よろしいですか？',
-      { ok: 'サンプルを入れる', danger: true, title: 'サンプルデータ' })) return false;
-  }
-
-  const bar = busy('サンプルを作っています');
-  try {
-    const d = buildDemoData(today());
-    for (const c of COLLECTIONS) {
-      bar.set(0, 1, `${LABEL[c] || c} を入れています`);
-      await store.clearCollection(c);
-      if (d[c]?.length) await store.bulk(c, d[c], (x, t) => bar.set(x, t, `${LABEL[c] || c}　${x}/${t}`));
-    }
-    await store.setMeta('company', d.company);
-    await store.setMeta('codeLists', d.codeLists);
-    await store.setCounters(d.counters);
-    await store.loadCompany();
-    await store.loadMasters();
-  } finally { bar.done(); }
-  return true;
+      el('div', { class: 'btnrow' }, btn('引っ越し画面をひらく', () => go('ikou'), 'btn--ghost')))));
 }
 
 const LABEL = {

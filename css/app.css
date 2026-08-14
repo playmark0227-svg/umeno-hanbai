@@ -116,16 +116,6 @@ button,input,select,textarea{ font:inherit; color:inherit; }
 .fontsize button+button{ border-left:1px solid rgba(255,255,255,.2); }
 .fontsize button[aria-pressed="true"]{ background:var(--washi); color:var(--ai-900); font-weight:700; }
 
-/* サンプルデータで動いているときの帯 */
-body.is-demo .head::before{
-  content:"サ ン プ ル デ ー タ で 表 示 し て い ま す";
-  position:absolute; inset:auto 0 -1.55rem 0; z-index:29;
-  background:var(--kin); color:var(--ai-900);
-  font-size:.72rem; font-weight:700; letter-spacing:.22em; text-align:center; padding:.15rem;
-}
-body.is-demo .head{ position:sticky; }
-body.is-demo .view{ padding-top:2.6rem; }
-
 .view{ flex:1; padding:1.4rem clamp(.8rem,3vw,2rem) 3rem; max-width:1500px; width:100%; margin:0 auto; }
 .view:focus{ outline:none; }
 
