@@ -1,0 +1,16 @@
+{
+  "name": "梅乃寿司 販売管理",
+  "short_name": "梅乃寿司",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b1c2b",
+  "theme_color": "#12293d",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='48' fill='%2312293d'/%3E%3Cellipse cx='256' cy='308' rx='152' ry='88' fill='%23f6f1e7'/%3E%3Cpath d='M104 272c48-72 256-72 304 0l-8 32c-40-64-248-64-288 0z' fill='%23b5342a'/%3E%3Ctext x='256' y='170' font-size='108' font-family='serif' fill='%23f6f1e7' text-anchor='middle'%3E梅%3C/text%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
