@@ -128,6 +128,7 @@ const LABEL = {
   customers: '得意先', products: '商品', productCats: '商品部門', suppliers: '仕入先',
   cashPartners: '出納取引先', sales: '売上伝票', receipts: '入金伝票',
   purchases: '仕入伝票', payments: '出金伝票', cashbook: '現金出納', invoices: '請求履歴',
+  employees: '従業員', timesheets: '出退勤',
   company: '自社の情報', codeLists: '単位・摘要など', counters: '伝票番号の続き',
 };
 

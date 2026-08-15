@@ -20,6 +20,8 @@ const ICON = {
   backup: 'M4 7a8 3 0 1016 0 8 3 0 10-16 0M4 7v10c0 1.7 3.6 3 8 3s8-1.3 8-3V7M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3',
   shiire: 'M6 7h12l1 13H5zM9 7V5a3 3 0 016 0v2',
   motocho: 'M4 4h12l4 4v12H4zM16 4v4h4M8 13h8M8 17h5',
+  kyuryo: 'M12 2v20M7 5.5h7a3 3 0 010 6H8a3 3 0 000 6h8',
+  jugyoin: 'M9 11a3 3 0 100-6 3 3 0 000 6zM2 20v-1a5 5 0 015-5h4a5 5 0 015 5v1M17 7h5M19.5 4.5v5',
 };
 
 const icon = (d) => {
@@ -71,6 +73,10 @@ export async function render() {
       tile('売掛残高一覧', '誰にいくら残っているか', 'urikake', 'urikake'),
       tile('得意先元帳', '一社ごとの出入りを追う', 'motocho', 'motocho'),
       tile('月報', '月ごと・得意先ごとの売上', 'geppo', 'geppo'),
+    ]),
+    section('給料', [
+      tile('給料計算', '出退勤を入れて報酬を出す', 'kyuryo', 'kyuryo', 'tile--accent'),
+      tile('従業員', '名前・時給・交通費', 'jugyoin', 'jugyoin'),
     ]),
     section('台帳', [
       tile('得意先', '名前・住所・締日', 'tokui', 'tokui'),

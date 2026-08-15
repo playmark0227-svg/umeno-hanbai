@@ -236,6 +236,26 @@ table.t tbody tr.is-sel{ background:#fdf3d6; box-shadow:inset 4px 0 0 var(--kin)
 table.t .num{ text-align:right; font-weight:700; white-space:nowrap; }
 table.t .cen{ text-align:center; }
 table.t .nowrap{ white-space:nowrap; }
+
+/* 出退勤の表 */
+.t--payroll{ font-size:.92rem; }
+.t--payroll thead th{ position:static; font-size:.74rem; }
+.t--payroll td{ padding:.18rem .25rem; }
+.t--payroll input[type="time"]{
+  min-height:40px; min-width:0; width:100%; padding:.1rem .2rem;
+  text-align:center; font-variant-numeric:tabular-nums; font-size:.92rem;
+}
+.t--payroll td:nth-child(n+3):nth-child(-n+8){ min-width:5.2rem; }
+/* 時計アイコンを詰めて、1画面に収まるようにする */
+.t--payroll input[type="time"]::-webkit-calendar-picker-indicator{
+  padding:0; margin:0 0 0 1px; opacity:.45; transform:scale(.85);
+}
+.t--payroll input[type="time"]::-webkit-datetime-edit{ padding:0; }
+.t--payroll tbody tr.is-sat{ background:#eef3f8; }
+.t--payroll tbody tr.is-sun{ background:#fbeeed; }
+.t--payroll tbody tr.is-worked{ box-shadow:inset 3px 0 0 var(--midori); }
+.t--payroll tbody tr:hover{ background:#fdf6e3; }
+.warn-late{ color:var(--shu); font-weight:700; font-size:.82rem; white-space:nowrap; cursor:help; }
 table.t .muted{ color:var(--sumi-3); font-weight:400; }
 table.t tfoot td{ background:var(--ai-100); font-weight:700; border-top:2px solid var(--ai-800); }
 table.t .minus{ color:var(--shu); }

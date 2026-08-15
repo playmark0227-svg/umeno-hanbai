@@ -11,6 +11,7 @@ import * as Masters from './views/masters.js';
 import * as Billing from './views/billing.js';
 import * as Reports from './views/reports.js';
 import * as Backup from './views/backup.js';
+import * as Payroll from './views/payroll.js';
 
 /* ---------- 画面の一覧 ---------- */
 export const ROUTES = {
@@ -29,6 +30,9 @@ export const ROUTES = {
   nippo: { title: '日報', render: Reports.renderDaily },
   geppo: { title: '月報', render: Reports.renderMonthly },
   suito: { title: '現金出納帳', render: Reports.renderCashbook },
+
+  kyuryo: { title: '給料計算', render: Payroll.render },
+  jugyoin: { title: '従業員', render: (p) => Masters.render('employees', p) },
 
   tokui: { title: '得意先', render: (p) => Masters.render('customers', p) },
   shohin: { title: '商品', render: (p) => Masters.render('products', p) },
@@ -104,7 +108,7 @@ async function boot() {
   document.addEventListener('keydown', globalKeys);
   route();
 
-  if (store.mode === 'local' && !store.masters.customers.length) {
+  if (store.mode === 'local' && !store.masters.customers.length && !store.masters.employees.length) {
     setTimeout(() => firstRunHint(), 400);
   }
 }

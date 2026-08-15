@@ -11,8 +11,8 @@ const CFG_KEY = 'umeno.firebase.config';
 
 /** 伝票・マスタのコレクション一覧（バックアップもこの順で回す） */
 export const COLLECTIONS = [
-  'customers', 'products', 'productCats', 'suppliers', 'cashPartners',
-  'sales', 'receipts', 'purchases', 'payments', 'cashbook', 'invoices',
+  'customers', 'products', 'productCats', 'suppliers', 'cashPartners', 'employees',
+  'sales', 'receipts', 'purchases', 'payments', 'cashbook', 'invoices', 'timesheets',
 ];
 /** 日付で範囲検索する（＝伝票系）コレクション */
 export const DATED = new Set(['sales', 'receipts', 'purchases', 'payments', 'cashbook']);
@@ -22,7 +22,7 @@ export const store = {
   user: null,
   company: null,
   codeLists: { units: [], areas: [], custTypes: [], cashNotes: [], receiptNotes: [] },
-  masters: { customers: [], products: [], productCats: [], suppliers: [], cashPartners: [] },
+  masters: { customers: [], products: [], productCats: [], suppliers: [], cashPartners: [], employees: [] },
   _fb: null,
   _idb: null,
   _listeners: new Set(),

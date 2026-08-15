@@ -12,6 +12,28 @@ const HONORIFIC = [{ value: 1, label: '様' }, { value: 2, label: '御中' }];
 const CLOSEDAYS = [...Array(31)].map((_, i) => ({ value: i + 1, label: i + 1 === 31 ? '末日' : `${i + 1}日` }));
 
 const SPEC = {
+  employees: {
+    title: '従業員', path: 'jugyoin', codeLabel: '番号',
+    cols: [
+      { h: '番号', w: '5rem', cls: 'num', k: 'code' },
+      { h: '名前', fmt: (r) => r.name },
+      { h: 'かな', fmt: (r) => el('span', { class: 'muted' }, r.kana || '') },
+      { h: '時給①', w: '7rem', cls: 'num', fmt: (r) => `${yen(r.rate1)}円` },
+      { h: '時給②（22時以降）', w: '10rem', cls: 'num', fmt: (r) => `${yen(r.rate2 ?? r.rate1)}円` },
+      { h: '交通費（月）', w: '8rem', cls: 'num', fmt: (r) => (num(r.commute) ? `${yen(r.commute)}円` : el('span', { class: 'muted' }, '—')) },
+      { h: '在籍', w: '5rem', cls: 'cen', fmt: (r) => (r.active === false ? el('span', { class: 'tag tag--void' }, '退職') : '○') },
+    ],
+    fields: (v) => [
+      ['code', '番号', numInput({ value: v.code ?? '' }), { req: true, hint: '並び順に使います' }],
+      ['name', '名前', input({ value: v.name || '' }), { req: true, hint: '給与明細に出ます' }],
+      ['kana', 'かな', input({ value: v.kana || '' })],
+      ['rate1', '時給①', numInput({ value: v.rate1 ?? 1000 }), { req: true, hint: '22時までの時給' }],
+      ['rate2', '時給②', numInput({ value: v.rate2 ?? v.rate1 ?? 1000 }), { hint: '22時以降の時給。今までどおりなら時給①と同じ額' }],
+      ['commute', '交通費（1か月）', numInput({ value: v.commute ?? 0 }), { hint: '毎月の合計に足されます' }],
+      ['active', '在籍', select([{ value: 1, label: '在籍中' }, { value: 0, label: '退職' }], { value: v.active === false ? 0 : 1 })],
+      ['note', 'メモ', input({ value: v.note || '' }), { wide: true }],
+    ],
+  },
   customers: {
     title: '得意先', path: 'tokui', codeLabel: '得意先番号',
     cols: [
@@ -139,11 +161,16 @@ function editView(coll, spec, doc) {
   const info = el('div');
 
   const save = async () => {
+    const NUMS = ['code', 'cat', 'price', 'cost', 'closeDay', 'payMonth', 'payDay',
+      'honorific', 'openingBalance', 'rate1', 'rate2', 'commute'];
     const body = { ...v };
     for (const [k, , nodeEl] of defs) {
       const raw = nodeEl.value;
-      body[k] = ['code', 'cat', 'price', 'cost', 'closeDay', 'payMonth', 'payDay', 'honorific', 'openingBalance'].includes(k)
-        ? int(raw) : String(raw ?? '').trim();
+      body[k] = NUMS.includes(k) ? int(raw) : String(raw ?? '').trim();
+    }
+    if (coll === 'employees') {
+      body.active = String(nodes.active.value) === '1';
+      if (!body.rate2) body.rate2 = body.rate1;
     }
     if (!body.name) { toast('名前を入れてください', 'err'); nodes.name.focus(); return; }
     if (body.code === 0 && coll !== 'customers') { toast('番号を入れてください', 'err'); nodes.code.focus(); return; }
@@ -152,7 +179,7 @@ function editView(coll, spec, doc) {
     if (clash) { toast(`番号 ${body.code} は「${clash.name}」で使われています`, 'err'); nodes.code.focus(); return; }
 
     body.id = v.id || String(body.code);
-    body.active = true;
+    if (coll !== 'employees') body.active = true;
     await store.save(coll, body);
     toast(isNew ? '登録しました' : '保存しました');
     go(spec.path);
