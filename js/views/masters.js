@@ -24,7 +24,7 @@ const SPEC = {
       { h: '在籍', w: '5rem', cls: 'cen', fmt: (r) => (r.active === false ? el('span', { class: 'tag tag--void' }, '退職') : '○') },
     ],
     fields: (v) => [
-      ['code', '番号', numInput({ value: v.code ?? '' }), { req: true, hint: '並び順に使います' }],
+      ['code', '番号', numInput({ value: v.code ?? '' }), { hint: '自動で付きます。並び順にだけ使う番号です' }],
       ['name', '名前', input({ value: v.name || '' }), { req: true, hint: '給与明細に出ます' }],
       ['kana', 'かな', input({ value: v.kana || '' })],
       ['rate1', '時給①', numInput({ value: v.rate1 ?? 1000 }), { req: true, hint: '22時までの時給' }],
@@ -46,7 +46,7 @@ const SPEC = {
       { h: '移行時残高', w: '8rem', cls: 'num', fmt: (r) => (num(r.openingBalance) ? yen(r.openingBalance) : el('span', { class: 'muted' }, '—')) },
     ],
     fields: (v) => [
-      ['code', '得意先番号', numInput({ value: v.code ?? '' }), { req: true, hint: '売上伝票で打つ番号' }],
+      ['code', '得意先番号', numInput({ value: v.code ?? '' }), { hint: '自動で付きます。売上伝票で打つ番号なので、決まりがあれば変えてください' }],
       ['name', '得意先名', input({ value: v.name || '' }), { req: true }],
       ['kana', 'かな', input({ value: v.kana || '', placeholder: 'ｱｵｲｼｮｳｼﾞ' }), { hint: '検索で使います' }],
       ['honorific', '敬称', select(HONORIFIC, { value: v.honorific ?? 2 })],
@@ -75,7 +75,7 @@ const SPEC = {
       { h: '単価', w: '7rem', cls: 'num', fmt: (r) => (num(r.price) ? yen(r.price) : el('span', { class: 'muted' }, 'その都度')) },
     ],
     fields: (v) => [
-      ['code', '商品番号', numInput({ value: v.code ?? '' }), { req: true }],
+      ['code', '商品番号', numInput({ value: v.code ?? '' }), { hint: '自動で付きます。売上伝票で打つ番号です' }],
       ['cat', '部門', select(store.masters.productCats.map((c) => ({ value: c.code, label: `${c.code} ${c.name}` })), { value: v.cat ?? 1 })],
       ['name', '品名', input({ value: v.name || '' }), { req: true, wide: true }],
       ['kana', 'かな', input({ value: v.kana || '' })],
@@ -94,7 +94,7 @@ const SPEC = {
       { h: '締日', w: '5rem', cls: 'cen', fmt: (r) => (Number(r.closeDay) >= 31 ? '末' : `${r.closeDay || 31}日`) },
     ],
     fields: (v) => [
-      ['code', '仕入先番号', numInput({ value: v.code ?? '' }), { req: true }],
+      ['code', '仕入先番号', numInput({ value: v.code ?? '' }), { hint: '自動で付きます' }],
       ['name', '仕入先名', input({ value: v.name || '' }), { req: true }],
       ['kana', 'かな', input({ value: v.kana || '' })],
       ['zip', '郵便番号', input({ value: v.zip || '' })],
@@ -151,14 +151,45 @@ function listView(coll, spec) {
 }
 
 /* ==================== 編集 ==================== */
+/**
+ * 次の番号 ＝ 今ある一番大きい番号 ＋1。
+ * 途中の空き番号は埋めない。昔消した得意先の番号を使い回すと、
+ * その番号で残っている過去の伝票が新しい得意先にぶら下がってしまうため。
+ * （実際 Access 由来のデータには、マスタに無い番号の伝票が 446種類ある）
+ *
+ * 商品だけは部門ごとに番号帯が決まっているので、その部門の続きから取る。
+ *   寿司 1〜18 ／ 飲物(酒) 111〜119 ／ 飲物(ｼﾞｭｰｽ) 151〜 ／ 宴会 211〜 ／ 法事 221〜
+ */
+function nextCode(coll, cat) {
+  const rows = store.masters[coll];
+  const max = (list) => list.reduce((a, r) => Math.max(a, Number(r.code) || 0), 0);
+  if (coll === 'products' && cat != null) {
+    const inCat = rows.filter((r) => Number(r.cat) === Number(cat));
+    if (inCat.length) return max(inCat) + 1;    // その部門の続き
+    // まだ1件も無い部門は番号帯が読めないので、全体の続きにする
+  }
+  return max(rows) + 1;
+}
+
 function editView(coll, spec, doc) {
   const isNew = !doc;
-  const v = doc || {};
+  // 新規は番号を自動で付ける（商品は既定の部門「寿司」の続きから）
+  const v = doc || { code: nextCode(coll, coll === 'products' ? 1 : null) };
   setHint('<b>Enter</b>で次の欄へ／<b>F1</b>で登録／<b>F12</b>でメニューへ');
 
   const defs = spec.fields(v);
   const nodes = Object.fromEntries(defs.map(([k, , node]) => [k, node]));
   const info = el('div');
+
+  // 商品は部門を変えたら番号を付け直す。ただし自分で打った番号は尊重する
+  if (coll === 'products' && isNew) {
+    let auto = String(v.code);
+    nodes.cat.addEventListener('change', () => {
+      if (nodes.code.value !== auto) return;          // 手で変えられていたら触らない
+      auto = String(nextCode('products', nodes.cat.value));
+      nodes.code.value = auto;
+    });
+  }
 
   const save = async () => {
     const NUMS = ['code', 'cat', 'price', 'cost', 'closeDay', 'payMonth', 'payDay',
@@ -173,7 +204,7 @@ function editView(coll, spec, doc) {
       if (!body.rate2) body.rate2 = body.rate1;
     }
     if (!body.name) { toast('名前を入れてください', 'err'); nodes.name.focus(); return; }
-    if (body.code === 0 && coll !== 'customers') { toast('番号を入れてください', 'err'); nodes.code.focus(); return; }
+    if (isNew && !body.code) body.code = nextCode(coll, coll === 'products' ? body.cat : null);
 
     const clash = store.masters[coll].find((r) => Number(r.code) === Number(body.code) && r.id !== v.id);
     if (clash) { toast(`番号 ${body.code} は「${clash.name}」で使われています`, 'err'); nodes.code.focus(); return; }
@@ -215,7 +246,7 @@ function editView(coll, spec, doc) {
     el('datalist', { id: 'unitList2' }, (store.codeLists.units || []).map((u) => el('option', { value: u }))));
 
   enterMovesNext(form);
-  setTimeout(() => (isNew ? nodes.code : nodes.name)?.focus(), 60);
+  setTimeout(() => nodes.name?.focus(), 60);
   return form;
 }
 
